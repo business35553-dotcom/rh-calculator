@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RH Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&family=Sora:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#F5F7FB;--surf:#FFFFFF;--surf2:#E9EDF6;--ink:#101827;--mute:#5B6475;--blue:#3987FF;--purple:#8055F5;--green:#22C55E;--orange:#F59E0B;--red:#EF4444;--line:#D8DEEB;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1220;--surf:#101827;--surf2:#1A2438;--ink:#EAF0FF;--mute:#93A0B8;--line:#222E46}}
+:root[data-theme="dark"]{--bg:#0B1220;--surf:#101827;--surf2:#1A2438;--ink:#EAF0FF;--mute:#93A0B8;--line:#222E46}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Sora,"Noto Sans Bengali",system-ui,sans-serif}
+body{min-height:100vh}
+header{display:flex;align-items:center;gap:10px;padding:14px 16px;max-width:980px;margin:auto}
+.logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px}
+h1{font-size:18px;margin:0;flex:1}
+.tb{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
+nav{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;max-width:980px;margin:auto}
+nav button{flex:none;border:0;background:transparent;color:var(--mute);padding:9px 14px;border-radius:10px;font:inherit;font-size:14px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--surf);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+main{max-width:980px;margin:auto;padding:0 16px 40px}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:16px}
+.calc{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:16px}
+@media(max-width:760px){.calc{grid-template-columns:1fr}}
+.screen{min-height:104px;text-align:right;padding:6px 4px 12px;overflow-x:auto}
+.ex{font-size:26px;word-break:break-all;min-height:34px}
+.pv{font-size:15px;color:var(--mute);min-height:22px;margin-top:4px}
+.pv.err{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid button,.sci button,.mem button{border:0;border-radius:14px;padding:15px 0;font:inherit;font-size:18px;background:var(--surf2);color:var(--ink);cursor:pointer;transition:transform .08s}
+.grid button:active,.sci button:active{transform:scale(.95)}
+.grid .op{background:color-mix(in srgb,var(--blue) 18%,var(--surf2));color:var(--blue)}
+.grid .eq{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.grid .ac{color:var(--red)}
+.sci{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.sci button{font-size:14px;padding:11px 0}
+.sci.hide{display:none}
+.mem{display:flex;gap:6px;margin-bottom:10px;align-items:center}
+.mem button{font-size:13px;padding:8px 0;flex:1}
+.mem .ang{flex:1.4;color:var(--purple)}
+.hist{max-height:520px;overflow:auto}
+.hi{display:block;width:100%;text-align:right;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:10px 4px;font:inherit;cursor:pointer}
+.hi small{display:block;color:var(--mute);font-size:13px}
+.hi b{font-size:18px;font-weight:600}
+.empty{color:var(--mute);font-size:14px;padding:12px 4px}
+label{display:block;font-size:13px;color:var(--mute);margin:12px 0 5px}
+input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.out{margin-top:14px;padding:14px;border-radius:14px;background:var(--surf2)}
+.out div{display:flex;justify-content:space-between;gap:10px;padding:4px 0}
+.out b{font-size:17px}
+.note{font-size:13px;color:var(--mute);margin-top:12px;line-height:1.5}
+.tabs2{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.tabs2 button{border:1px solid var(--line);background:var(--surf);color:var(--ink);padding:7px 12px;border-radius:999px;font:inherit;font-size:13px;cursor:pointer}
+.tabs2 button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+#pa{display:none}@media print{body>*:not(#pa){display:none!important}#pa{display:block!important;color:#000;background:#fff;padding:16px}#pa table{width:100%;border-collapse:collapse}#pa th,#pa td{border:1px solid #999;padding:6px;text-align:left}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<meta name="theme-color" content="#101827">
+<meta name="description" content="RH Calculator: calculator, scientific, unit converter, finance and currency tools. Works offline.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RH Calculator">
+</head>
+<body>
+<header>
+  <div class="logo" aria-hidden="true">RH</div>
+  <h1>RH Calculator</h1>
+  <button class="tb" id="lang" aria-label="Language">EN</button>
+  <button class="tb" id="theme" aria-label="Theme">◐</button>
+</header>
+<nav role="tablist" id="nav"></nav>
+<main>
+  <section class="panel on" id="p-calc">
+    <div class="calc">
+      <div class="card">
+        <div class="screen" aria-live="polite"><div class="ex" id="ex"></div><div class="pv" id="pv"></div></div><div class="mem"><button class="tb" id="kcp"></button><button class="tb" id="ksh"></button></div>
+        <div class="mem" id="mem"></div>
+        <div class="sci hide" id="sci"></div>
+        <div class="grid" id="keys"></div>
+      </div>
+      <div class="card"><div class="row" style="align-items:center"><b data-t="hist"></b><button class="tb" id="clrh" data-t="clear"></button></div><div class="hist" id="hist"></div></div>
+    </div>
+  </section>
+  <section class="panel" id="p-conv"><div class="card" id="conv"></div></section>
+  <section class="panel" id="p-fin"><div class="card" id="fin"></div></section>
+  <section class="panel" id="p-cur"><div class="card" id="cur"></div></section>
+  <section class="panel" id="p-tools"><div class="card" id="tools"></div></section>
+  <section class="panel" id="p-data"><div class="card" id="data"></div></section>
+</main>
+<script>
+/* ---------- Safe math engine (no eval) ---------- */
+const MathEngine=(()=>{
+  const PHI=(1+Math.sqrt(5))/2;
+  const fact=n=>{if(!Number.isInteger(n)||n<0||n>170)throw new Error('fact');let r=1;for(let i=2;i<=n;i++)r*=i;return r};
+  const nPr=(n,r)=>{if(!Number.isInteger(n)||!Number.isInteger(r)||r<0||r>n)throw new Error('npr');let x=1;for(let i=0;i<r;i++)x*=(n-i);return x};
+  const nCr=(n,r)=>{if(!Number.isInteger(n)||!Number.isInteger(r)||r<0||r>n)throw new Error('npr');r=Math.min(r,n-r);let x=1;for(let i=1;i<=r;i++)x=x*(n-r+i)/i;return Math.round(x)};
+  function evaluate(src,mode){
+    const toR=x=>mode==='deg'?x*Math.PI/180:mode==='grad'?x*Math.PI/200:x;
+    const fromR=x=>mode==='deg'?x*180/Math.PI:mode==='grad'?x*200/Math.PI:x;
+    const F={sin:x=>Math.sin(toR(x)),cos:x=>Math.cos(toR(x)),tan:x=>Math.tan(toR(x)),asin:x=>fromR(Math.asin(x)),acos:x=>fromR(Math.acos(x)),atan:x=>fromR(Math.atan(x)),
+      sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,log:Math.log10,log10:Math.log10,log2:Math.log2,ln:Math.log,sqrt:Math.sqrt,cbrt:Math.cbrt,abs:Math.abs,exp:Math.exp,fact:fact,
+      nthroot:(x,n)=>(x<0&&n%2===1)?-Math.pow(-x,1/n):Math.pow(x,1/n),npr:nPr,ncr:nCr,mod:(a,b)=>a%b};
+    const C={pi:Math.PI,e:Math.E,phi:PHI};
+    const s=src.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/π/g,'pi').replace(/φ/g,'phi').replace(/√/g,'sqrt').replace(/∛/g,'cbrt').replace(/\s+/g,'');
+    const tok=[];const re=/(\d+\.?\d*|\.\d+)(e[+-]?\d+)?|[a-z0-9]+|[+\-*\/^!%(),]/gi;let m,last=0;
+    while((m=re.exec(s))){if(m.index!==last)throw new Error('syntax');last=re.lastIndex;
+      if(/^[\d.]/.test(m[0]))tok.push({t:'n',v:parseFloat(m[0])});
+      else if(/^[a-z]/i.test(m[0]))tok.push({t:'i',v:m[0].toLowerCase()});
+      else tok.push({t:'o',v:m[0]});}
+    if(last!==s.length)throw new Error('syntax');
+    let p=0;const pk=()=>tok[p],nx=()=>tok[p++],isO=v=>pk()&&pk().t==='o'&&pk().v===v;
+    function expr(){let a=term();while(isO('+')||isO('-')){const o=nx().v;const b=term();a=o==='+'?a+b:a-b}return a}
+    function term(){let a=unary();for(;;){if(isO('*')||isO('/')){const o=nx().v;const b=unary();if(o==='/'&&b===0)throw new Error('div0');a=o==='*'?a*b:a/b}
+      else if(pk()&&(pk().t==='n'||pk().t==='i'||isO('('))){a=a*unary()}else break}return a}
+    function unary(){if(isO('-')){nx();return -unary()}if(isO('+')){nx();return unary()}return power()}
+    function power(){const b=post();if(isO('^')){nx();return Math.pow(b,unary())}return b}
+    function post(){let a=prim();while(isO('!')||isO('%')){const o=nx().v;a=o==='!'?fact(a):a/100}return a}
+    function prim(){const t=nx();if(!t)throw new Error('syntax');
+      if(t.t==='n')return t.v;
+      if(t.t==='o'&&t.v==='('){const v=expr();if(!isO(')'))throw new Error('syntax');nx();return v}
+      if(t.t==='i'){if(t.v in C&&!isO('('))return C[t.v];
+        if(!(t.v in F))throw new Error('syntax');
+        if(!isO('('))throw new Error('syntax');nx();const args=[expr()];while(isO(',')){nx();args.push(expr())}
+        if(!isO(')'))throw new Error('syntax');nx();return F[t.v](...args)}
+      throw new Error('syntax')}
+    const r=expr();if(p!==tok.length)throw new Error('syntax');
+    if(typeof r!=='number'||Number.isNaN(r))throw new Error('domain');
+    if(!Number.isFinite(r))throw new Error('overflow');
+    return r}
+  const clean=x=>parseFloat(x.toPrecision(12));
+  return{evaluate,clean};
+})();
+/* ---------- i18n ---------- */
+const T={
+ bn:{calc:'ক্যালকুলেটর',conv:'কনভার্টার',fin:'ফিন্যান্স',cur:'কারেন্সি',hist:'হিস্ট্রি',clear:'মুছুন',sci:'সায়েন্টিফিক',noh:'এখনো কোনো হিসাব নেই।',
+  syntax:'এক্সপ্রেশনটি সঠিক নয়',div0:'শূন্য দিয়ে ভাগ করা যায় না',domain:'এই মানের ফল নির্ধারণ করা যায় না',overflow:'ফল অনেক বড়',fact:'ফ্যাক্টোরিয়াল শুধু ০–১৭০ পূর্ণসংখ্যার জন্য',npr:'n ও r পূর্ণসংখ্যা হতে হবে এবং r ≤ n',
+  cat:'ধরন',from:'থেকে',to:'এতে',val:'মান',emi:'লোন / EMI',si:'সরল সুদ',ci:'চক্রবৃদ্ধি সুদ',vat:'VAT / ট্যাক্স',amt:'টাকার পরিমাণ',rate:'বার্ষিক হার (%)',mon:'মেয়াদ (মাস)',yrs:'মেয়াদ (বছর)',freq:'বছরে কতবার যুক্ত হবে',
+  monthly:'মাসিক কিস্তি',tint:'মোট সুদ',tot:'মোট পরিশোধ',intr:'সুদ',fin2:'চূড়ান্ত ব্যালান্স',net:'নেট মূল্য',tax:'ট্যাক্স / VAT',gross:'মোট (ট্যাক্সসহ)',taxr:'হার (%)',
+  curnote:'লাইভ এক্সচেঞ্জ রেট এই প্রকাশিত পেজ থেকে আনা যায় না (ইন্টারনেট অনুরোধ ব্লক থাকে)। আমি কোনো নকল রেট দেখাব না। আপনি নিজে রেট বসিয়ে হিসাব করতে পারেন; লাইভ রেটসহ কারেন্সি কনভার্টার Flutter অ্যাপে যুক্ত হবে।',
+  yourrate:'আপনার দেওয়া রেট (১ একক = কত?)',res:'ফলাফল',est:'এগুলো আনুমানিক হিসাব; ব্যাংক বা সরকারি হিসাব নয়।',deg:'ডিগ্রি',rad:'রেডিয়ান',grad:'গ্রেড',
+  length:'দৈর্ঘ্য',weight:'ওজন',area:'ক্ষেত্রফল',volume:'আয়তন',time:'সময়',speed:'গতি',data:'ডেটা',temp:'তাপমাত্রা'},
+ en:{calc:'Calculator',conv:'Converter',fin:'Finance',cur:'Currency',hist:'History',clear:'Clear',sci:'Scientific',noh:'No calculations yet.',
+  syntax:'This expression is not valid',div0:'Cannot divide by zero',domain:'Result is undefined for this input',overflow:'Result is too large',fact:'Factorial needs a whole number from 0 to 170',npr:'n and r must be whole numbers with r ≤ n',
+  cat:'Type',from:'From',to:'To',val:'Value',emi:'Loan / EMI',si:'Simple interest',ci:'Compound interest',vat:'VAT / Tax',amt:'Amount',rate:'Annual rate (%)',mon:'Duration (months)',yrs:'Duration (years)',freq:'Times compounded per year',
+  monthly:'Monthly payment',tint:'Total interest',tot:'Total repayment',intr:'Interest earned',fin2:'Final balance',net:'Net price',tax:'Tax / VAT',gross:'Total with tax',taxr:'Rate (%)',
+  curnote:'Live exchange rates cannot be fetched from this published page (outgoing requests are blocked). No fake rates are shown. You can enter a rate yourself; the live-rate currency converter will come with the Flutter app.',
+  yourrate:'Your rate (1 unit = how many?)',res:'Result',est:'These are estimates, not bank or official tax figures.',deg:'Deg',rad:'Rad',grad:'Grad',
+  length:'Length',weight:'Weight',area:'Area',volume:'Volume',time:'Time',speed:'Speed',data:'Data',temp:'Temperature'}};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let lang=store.get('rh.lang','bn'),theme=store.get('rh.theme',null),hist=store.get('rh.hist',[]),mode=store.get('rh.angle','deg'),sciOn=store.get('rh.sci',false),mem=0,expr='';
+const t=k=>T[lang][k]||k;
+const $=id=>document.getElementById(id);
+const S=(bn,en)=>lang==='bn'?bn:en;
+const dig=v=>lang==='bn'?String(v).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]):String(v);
+const fmt=(x,max=8)=>{if(!Number.isFinite(x))return '—';return new Intl.NumberFormat(lang==='bn'?'bn-BD':'en-US',{maximumFractionDigits:max}).format(MathEngine.clean(x))};
+/* ---------- Chrome ---------- */
+T.bn.tools='বয়স/BMI/GPA';T.en.tools='Age/BMI/GPA';T.bn.data='ডেটা';T.en.data='Data';
+const tabs=[['calc','p-calc'],['conv','p-conv'],['fin','p-fin'],['cur','p-cur'],['tools','p-tools'],['data','p-data']];
+function buildNav(){const n=$('nav');n.innerHTML='';tabs.forEach(([k,p],i)=>{const b=document.createElement('button');b.textContent=t(k);b.setAttribute('role','tab');b.setAttribute('aria-selected',String(n.dataset.cur?n.dataset.cur===p:i===0));b.onclick=()=>{n.dataset.cur=p;document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('on',x.id===p));buildNav()};n.appendChild(b)})}
+function applyTheme(){if(theme)document.documentElement.dataset.theme=theme;else delete document.documentElement.dataset.theme}
+$('theme').onclick=()=>{const dark=theme?theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;theme=dark?'light':'dark';store.set('rh.theme',theme);applyTheme()};
+$('lang').onclick=()=>{lang=lang==='bn'?'en':'bn';store.set('rh.lang',lang);renderAll()};
+/* ---------- Calculator ---------- */
+const BASIC=[['AC','ac'],['⌫',''],['%','op'],['÷','op'],['7'],['8'],['9'],['×','op'],['4'],['5'],['6'],['−','op'],['1'],['2'],['3'],['+','op'],['±'],['0'],['.'],['=','eq']];
+const SCI=[['sin(','sin'],['cos(','cos'],['tan(','tan'],['log(','log'],['ln(','ln'],['asin(','sin⁻¹'],['acos(','cos⁻¹'],['atan(','tan⁻¹'],['sqrt(','√'],['cbrt(','∛'],['^','xʸ'],['^2','x²'],['!','n!'],['π','π'],['e','e'],['φ','φ'],['nCr(','nCr'],['nPr(','nPr'],['abs(','|x|'],['(',  '('],[')',')'],['nthroot(','ⁿ√'],[',',','],['mod(','mod'],['1/(','1/x']];
+function buildCalc(){
+  const k=$('keys');k.innerHTML='';BASIC.forEach(([l,c])=>{const b=document.createElement('button');b.textContent=l;if(c)b.className=c;b.setAttribute('aria-label',l);b.onclick=()=>press(l);k.appendChild(b)});
+  const s=$('sci');s.innerHTML='';SCI.forEach(([v,l])=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>ins(v);s.appendChild(b)});s.classList.toggle('hide',!sciOn);
+  const m=$('mem');m.innerHTML='';[['MC',()=>mem=0],['MR',()=>ins(String(mem))],['M+',()=>mem=MathEngine.clean(mem+cur())],['M−',()=>mem=MathEngine.clean(mem-cur())],['MS',()=>mem=cur()]].forEach(([l,f])=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>{f();show()};m.appendChild(b)});
+  const sb=document.createElement('button');sb.textContent=t('sci');sb.className='ang';sb.onclick=()=>{sciOn=!sciOn;store.set('rh.sci',sciOn);buildCalc()};m.appendChild(sb);
+  const ab=document.createElement('button');ab.textContent=t(mode);ab.className='ang';ab.onclick=()=>{mode=mode==='deg'?'rad':mode==='rad'?'grad':'deg';store.set('rh.angle',mode);buildCalc();show()};m.appendChild(ab);
+  show();drawHist();wireShare()}
+function resTxt(){try{return String(MathEngine.clean(MathEngine.evaluate(expr||'0',mode)))}catch(e){return null}}
+function wireShare(){const c=$('kcp'),h=$('ksh');if(!c)return;c.textContent=S('কপি','Copy');h.textContent=S('শেয়ার','Share');h.style.display=navigator.share?'':'none';
+ c.onclick=async()=>{const r=resTxt();if(r===null)return;try{await navigator.clipboard.writeText(r);c.textContent=S('কপি হয়েছে ✓','Copied ✓')}catch(e){c.textContent=S('কপি করা যায়নি','Copy blocked')}setTimeout(()=>{c.textContent=S('কপি','Copy')},1500)};
+ h.onclick=()=>{const r=resTxt();if(r===null)return;navigator.share({text:(expr||'0')+' = '+r}).catch(()=>{})}}
+function cur(){try{return MathEngine.clean(MathEngine.evaluate(expr||'0',mode))}catch(e){return 0}}
+function ins(v){expr+=v;show()}
+function press(l){
+  if(l==='AC')expr='';
+  else if(l==='⌫')expr=expr.slice(0,-1);
+  else if(l==='=')return equals();
+  else if(l==='±'){expr=expr?(expr.startsWith('−(')&&expr.endsWith(')')?expr.slice(2,-1):'−('+expr+')'):''}
+  else expr+=l;
+  show()}
+function show(){
+  $('ex').textContent=dig(expr||'0');const pv=$('pv');pv.className='pv';
+  if(!expr){pv.textContent='';return}
+  try{const r=MathEngine.clean(MathEngine.evaluate(expr,mode));pv.textContent='= '+fmt(r,10)}
+  catch(e){pv.textContent=/[+\-×÷−*/^(,]$/.test(expr)?'':t(e.message in T.bn?e.message:'syntax');pv.className='pv err'}}
+function equals(){
+  if(!expr)return;
+  try{const r=MathEngine.clean(MathEngine.evaluate(expr,mode));hist.unshift({e:expr,r:String(r),d:Date.now()});hist=hist.slice(0,100);store.set('rh.hist',hist);expr=String(r);show();drawHist()}
+  catch(e){const pv=$('pv');pv.className='pv err';pv.textContent=t(e.message in T.bn?e.message:'syntax')}}
+function drawHist(){const h=$('hist');h.innerHTML='';if(!hist.length){h.innerHTML='<div class="empty">'+t('noh')+'</div>';return}
+  hist.forEach(x=>{const b=document.createElement('button');b.className='hi';b.innerHTML='<small></small><b></b>';b.children[0].textContent=dig(x.e);b.children[1].textContent='= '+fmt(parseFloat(x.r),10);b.onclick=()=>{expr=x.r;show()};h.appendChild(b)})}
+$('clrh').onclick=()=>{if(!hist.length||!confirm(lang==='bn'?'সব হিস্ট্রি মুছে ফেলবেন?':'Delete all history?'))return;hist=[];store.set('rh.hist',hist);drawHist()};
+document.addEventListener('keydown',e=>{
+  if(!$('p-calc').classList.contains('on')||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key;
+  if(/^[0-9.]$/.test(k))ins(k);else if(k==='+')ins('+');else if(k==='-')ins('−');else if(k==='*')ins('×');else if(k==='/'){e.preventDefault();ins('÷')}
+  else if(k==='(' ||k===')'||k==='^'||k==='!'||k==='%'||k===',')ins(k);
+  else if(k==='Enter'||k==='='){e.preventDefault();equals()}else if(k==='Backspace'){expr=expr.slice(0,-1);show()}else if(k==='Escape'){expr='';show()}
+  else return;});
+/* ---------- Converter ---------- */
+const U={
+ length:{m:1,mm:.001,cm:.01,km:1000,in:.0254,ft:.3048,yd:.9144,mi:1609.344,nmi:1852},
+ weight:{kg:1,mg:1e-6,g:.001,t:1000,oz:.028349523125,lb:.45359237,st:6.35029318},
+ area:{'m²':1,'mm²':1e-6,'cm²':1e-4,'km²':1e6,ha:1e4,acre:4046.8564224,'ft²':.09290304},
+ volume:{L:1,mL:.001,'m³':1000,'gal (US)':3.785411784,'qt (US)':.946352946,'pt (US)':.473176473,'cup (US)':.2365882365,'fl oz (US)':.0295735295625},
+ time:{s:1,ms:.001,min:60,h:3600,day:86400,week:604800,month:2629746,year:31556952},
+ speed:{'m/s':1,'km/h':1/3.6,mph:.44704,knot:1852/3600},
+ data:{bit:1,byte:8,KB:8e3,MB:8e6,GB:8e9,TB:8e12,PB:8e15},
+ temp:{'°C':1,'°F':1,K:1}};
+let ccat='length';
+const tempTo=(v,u)=>u==='°C'?v:u==='°F'?(v-32)*5/9:v-273.15, tempFrom=(c,u)=>u==='°C'?c:u==='°F'?c*9/5+32:c+273.15;
+function buildConv(){const c=$('conv');
+  c.innerHTML='<div class="tabs2" id="cats"></div><div class="row"><div><label>'+t('from')+'</label><select id="cf"></select></div><div><label>'+t('to')+'</label><select id="ct"></select></div></div><label>'+t('val')+'</label><input id="cv" inputmode="decimal" value="1"><div class="out"><div><span>'+t('res')+'</span><b id="cr"></b></div></div><div class="note" id="cn"></div>';
+  const cats=$('cats');Object.keys(U).forEach(k=>{const b=document.createElement('button');b.textContent=t(k);b.setAttribute('aria-pressed',String(k===ccat));b.onclick=()=>{ccat=k;buildConv()};cats.appendChild(b)});
+  const us=Object.keys(U[ccat]);[$('cf'),$('ct')].forEach((s,i)=>{us.forEach(u=>s.add(new Option(u,u)));s.selectedIndex=Math.min(i,us.length-1);s.onchange=conv});$('cv').oninput=conv;
+  $('cn').textContent=ccat==='data'?(lang==='bn'?'এখানে KB = ১০০০ বাইট (দশমিক পদ্ধতি)।':'KB here means 1000 bytes (decimal).'):ccat==='time'?(lang==='bn'?'মাস ও বছর গড় মান (৩০.৪৩৭ ও ৩৬৫.২৪২ দিন)।':'Month and year use average lengths (30.437 and 365.242 days).'):'';
+  conv()}
+function conv(){const v=parseFloat($('cv').value),f=$('cf').value,to=$('ct').value;let r;
+  if(Number.isNaN(v)){$('cr').textContent='—';return}
+  if(ccat==='temp')r=tempFrom(tempTo(v,f),to);else r=v*U[ccat][f]/U[ccat][to];
+  $('cr').textContent=fmt(r,10)+' '+to}
+/* ---------- Finance ---------- */
+let fkind='emi';
+const num=id=>{const e=document.getElementById(id);return e?parseFloat(e.value):NaN};
+function buildFin(){const c=$('fin');
+  c.innerHTML='<div class="tabs2" id="fk"></div><div id="ff"></div><div class="out" id="fo"></div><div class="note">'+t('est')+'</div>';
+  const fk=$('fk');['emi','si','ci','vat'].forEach(k=>{const b=document.createElement('button');b.textContent=t(k);b.setAttribute('aria-pressed',String(k===fkind));b.onclick=()=>{fkind=k;buildFin()};fk.appendChild(b)});
+  const fld=(id,l,v)=>'<label>'+l+'</label><input id="'+id+'" inputmode="decimal" value="'+v+'">';
+  const f=$('ff');
+  if(fkind==='emi')f.innerHTML=fld('a',t('amt'),500000)+'<div class="row"><div>'+fld('r',t('rate'),10)+'</div><div>'+fld('n',t('mon'),24)+'</div></div>';
+  if(fkind==='si')f.innerHTML=fld('a',t('amt'),100000)+'<div class="row"><div>'+fld('r',t('rate'),8)+'</div><div>'+fld('n',t('yrs'),3)+'</div></div>';
+  if(fkind==='ci')f.innerHTML=fld('a',t('amt'),100000)+'<div class="row"><div>'+fld('r',t('rate'),8)+'</div><div>'+fld('n',t('yrs'),5)+'</div></div>'+fld('q',t('freq'),12);
+  if(fkind==='vat')f.innerHTML=fld('a',t('net'),1000)+fld('r',t('taxr'),15);
+  f.querySelectorAll('input').forEach(i=>i.oninput=finCalc);finCalc()}
+const row=(l,v)=>'<div><span>'+l+'</span><b>'+v+'</b></div>';
+function finCalc(){const o=$('fo'),A=num('a'),R=num('r'),N=num('n'),Q=num('q');
+  const bad=[A,R].some(x=>Number.isNaN(x)||x<0)||(fkind!=='vat'&&(Number.isNaN(N)||N<=0))||(fkind==='ci'&&(Number.isNaN(Q)||Q<=0));
+  if(bad){o.innerHTML=row(t('res'),'—');return}
+  if(fkind==='emi'){const i=R/1200;const p=i===0?A/N:A*i*Math.pow(1+i,N)/(Math.pow(1+i,N)-1);o.innerHTML=row(t('monthly'),fmt(p,2))+row(t('tint'),fmt(p*N-A,2))+row(t('tot'),fmt(p*N,2))}
+  if(fkind==='si'){const s=A*R*N/100;o.innerHTML=row(t('intr'),fmt(s,2))+row(t('fin2'),fmt(A+s,2))}
+  if(fkind==='ci'){const f=A*Math.pow(1+R/100/Q,Q*N);o.innerHTML=row(t('intr'),fmt(f-A,2))+row(t('fin2'),fmt(f,2))}
+  if(fkind==='vat'){const x=A*R/100;o.innerHTML=row(t('tax'),fmt(x,2))+row(t('gross'),fmt(A+x,2))}}
+/* ---------- Currency (manual rate only) ---------- */
+/* Rates: copied from x-rates.com USD table (26 Nov 2026, 04:46 UTC; table lists 100 USD, divided by 100). BDT is not on that table: last seen value from goldpricez.com, 6 Aug 2026. */
+const FX={date:'26 Nov 2026, 04:46 UTC',src:'x-rates.com',stale:{BDT:'6 Aug 2026'},
+ r:{USD:1,BDT:123.84,EUR:.91221882,GBP:.76311655,INR:92.57740668,SAR:3.75,AED:3.6725,CAD:1.42165642,AUD:1.50420023,JPY:159.1136107,CNY:6.66367365,CHF:.83183438,SGD:1.28997839,MYR:4.11767855,PKR:275.7871367,QAR:3.64,KWD:.31222934,OMR:.38471411,NZD:1.82238855,TRY:50.68340876,HKD:7.83853369,KRW:1342.9817,THB:34.01151131,ZAR:17.53142931,IDR:18393.68190608,NPR:148.19328374,LKR:332.05807028,PHP:63.67491596,SEK:10.23809703,NOK:9.80009099,DKK:6.81793877,BHD:.376,BRL:5.82093523,MXN:19.58086,PLN:4.07926965},
+ n:{USD:'US Dollar',BDT:'Bangladeshi Taka',EUR:'Euro',GBP:'British Pound',INR:'Indian Rupee',SAR:'Saudi Riyal',AED:'UAE Dirham',CAD:'Canadian Dollar',AUD:'Australian Dollar',JPY:'Japanese Yen',CNY:'Chinese Yuan',CHF:'Swiss Franc',SGD:'Singapore Dollar',MYR:'Malaysian Ringgit',PKR:'Pakistani Rupee',QAR:'Qatari Riyal',KWD:'Kuwaiti Dinar',OMR:'Omani Rial',NZD:'New Zealand Dollar',TRY:'Turkish Lira',HKD:'Hong Kong Dollar',KRW:'South Korean Won',THB:'Thai Baht',ZAR:'South African Rand',IDR:'Indonesian Rupiah',NPR:'Nepalese Rupee',LKR:'Sri Lankan Rupee',PHP:'Philippine Peso',SEK:'Swedish Krona',NOK:'Norwegian Krone',DKK:'Danish Krone',BHD:'Bahraini Dinar',BRL:'Brazilian Real',MXN:'Mexican Peso',PLN:'Polish Zloty'}};
+let cf=store.get('rh.cf','USD'),ct=store.get('rh.ct','BDT'),favs=store.get('rh.fav',['USD','BDT','EUR','SAR']),crec=store.get('rh.crec',[]).filter(x=>x&&typeof x.a==='number');
+let LIVE=store.get('rh.live',null),rIn=false,rErr=false;
+const rv=k=>(LIVE&&LIVE.r&&LIVE.r[k]>0)?{v:LIVE.r[k],snap:false}:{v:FX.r[k],snap:true};
+const fxRate=(a,b)=>{const o=parseFloat(store.get('rh.own.'+a+'.'+b,''));if(o>0)return{v:o,own:true,snap:false};const x=rv(a),y=rv(b);return{v:y.v/x.v,own:false,snap:x.snap||y.snap}};
+const okRates=d=>!!(d&&d.result==='success'&&d.rates&&d.rates.USD===1&&Object.keys(FX.r).filter(k=>d.rates[k]>0&&isFinite(d.rates[k])).length>=30);
+async function getJSON(u){const c=new AbortController(),tm=setTimeout(()=>c.abort(),8000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw new Error('http '+r.status);return await r.json()}finally{clearTimeout(tm)}}
+async function refreshRates(){if(rIn)return;rIn=true;rErr=false;drawStatus();let d=null;
+  for(const u of ['/.netlify/functions/rates','https://open.er-api.com/v6/latest/USD']){try{const j=await getJSON(u);if(okRates(j)){d=j;break}}catch(e){}}
+  if(d){const r={};Object.keys(FX.r).forEach(k=>{if(d.rates[k]>0)r[k]=d.rates[k]});LIVE={r:r,time:d.time_last_update_utc||'',fetched:Date.now()};store.set('rh.live',LIVE)}else rErr=true;
+  rIn=false;if(document.getElementById('cur'))buildCur()}
+function autoRates(){if(navigator.onLine&&(!LIVE||Date.now()-LIVE.fetched>6*36e5))refreshRates()}
+function drawStatus(){const o=$('cst');if(!o)return;const B=lang==='bn',fd=ms=>new Date(ms).toLocaleString(B?'bn-BD':'en-GB'),st=S('অবস্থা','Status'),w=x=>'<span style="color:var(--orange)">● '+x+'</span>',g=x=>'<span style="color:var(--green)">● '+x+'</span>';
+  let h;const fresh=LIVE&&!rErr&&Date.now()-LIVE.fetched<6*36e5;
+  if(rIn)h=row(st,S('হালনাগাদ হচ্ছে…','Updating…'));
+  else if(fresh)h=row(st,g(S('লাইভ রেট','Live rates')))+row(S('আনা হয়েছে','Fetched'),fd(LIVE.fetched))+row(S('সূত্র','Source'),'ExchangeRate-API (open.er-api.com)');
+  else if(LIVE)h=row(st,w(S('সংরক্ষিত রেট, লাইভ নয়','Saved rates, not live')))+row(S('শেষ সফল আপডেট','Last successful update'),fd(LIVE.fetched))+(rErr?row('',S('লাইভ রেট আনা যায়নি','Could not fetch live rates')):'');
+  else h=row(st,w(S('বিল্ট-ইন রেট, লাইভ নয়','Built-in rates, not live')))+row(S('তারিখ','Date'),dig(FX.date)+' ('+FX.src+')')+(rErr?row('',S('লাইভ রেট আনা যায়নি','Could not fetch live rates')):'');
+  o.innerHTML=h;const b=$('crf');if(b)b.disabled=rIn}
+function buildCur(){const c=$('cur'),B=lang==='bn';
+  const s=(bn,en)=>B?bn:en;
+  c.innerHTML='<div class="out" id="cst" style="margin:0 0 4px"></div><div style="margin:8px 0"><button class="tb" id="crf">'+s('রেট রিফ্রেশ','Refresh rates')+'</button></div>'
+  +'<label>'+t('amt')+'</label><input id="ca" inputmode="decimal" value="'+store.get('rh.camt','100')+'">'
+  +'<label>'+s('মুদ্রা খুঁজুন (কোড বা নাম)','Search currency (code or name)')+'</label><input id="cs" placeholder="BDT, taka, euro…">'
+  +'<div class="row"><div><label>'+t('from')+'</label><select id="cfs"></select></div><div><label>'+t('to')+'</label><select id="cts"></select></div></div>'
+  +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="tb" id="csw">⇄ '+s('অদলবদল','Swap')+'</button><button class="tb" id="cfv"></button><button class="tb" id="ccp">'+s('কপি','Copy')+'</button></div>'
+  +'<div class="out" id="cout"></div>'
+  +'<label>'+s('নিজের রেট (My Custom Rate, ঐচ্ছিক): ১ ','My Custom Rate (optional): 1 ')+'<span id="clab"></span></label><div class="row"><input id="cox" inputmode="decimal" placeholder="0.0"><button class="tb" id="cor">'+s('রেট রিসেট','Reset rate')+'</button></div>'
+  +'<label>'+s('প্রিয় মুদ্রায় তুলনা','Compare in favorites')+'</label><div class="out" id="ccmp"></div>'
+  +'<label>'+s('সাম্প্রতিক রূপান্তর','Recent conversions')+'</label><div class="out" id="crec"></div>'
+  +'<div class="note">'+s('এগুলো ইঙ্গিতমূলক রেট; ব্যাংক, কার্ড বা মানি-এক্সচেঞ্জের আসল রেট আলাদা হতে পারে। রেট অফলাইনেও কাজ করে, কারণ পেজের ভেতরেই সংরক্ষিত। বাংলাদেশি টাকার (BDT) রেট পুরোনো (৬ আগস্ট ২০২৬), তাই “নিজের রেট” ঘরে বর্তমান রেট বসিয়ে নিন।','These are indicative rates; real bank, card or money-exchange rates can differ. Rates work offline because they are saved inside the page. The Bangladeshi taka (BDT) rate is older (6 Aug 2026), so enter today’s rate in the own-rate box.')+'</div>';
+  const codes=Object.keys(FX.r);
+  const fill=()=>{const q=$('cs').value.trim().toLowerCase();[['cfs',cf],['cts',ct]].forEach(([id,cur])=>{const sel=$(id);sel.innerHTML='';codes.filter(k=>!q||k.toLowerCase().includes(q)||FX.n[k].toLowerCase().includes(q)||k===cur).forEach(k=>sel.add(new Option(k+' — '+FX.n[k],k)));sel.value=cur})};
+  const upd=()=>{
+    $('cfv').textContent=(favs.includes(cf)?'★ ':'☆ ')+s('প্রিয়','Favorite');
+    $('clab').textContent=cf+' = ? '+ct;
+    const a=parseFloat($('ca').value),r=fxRate(cf,ct),o=$('cout'),cmp=$('ccmp');
+    if(Number.isNaN(a)||a<0){o.innerHTML=row(t('res'),'—');cmp.innerHTML='';drawRec();return}
+    const res=a*r.v;let h=row(t('res'),fmt(a,4)+' '+cf+' = '+fmt(res,4)+' '+ct)+row(s('রেট','Rate'),'1 '+cf+' = '+fmt(r.v,6)+' '+ct);
+    const st=!r.own&&r.snap&&(FX.stale[cf]||FX.stale[ct]);
+    if(r.own)h+='<div><span style="color:var(--purple)">'+s('আপনার দেওয়া রেট ব্যবহার হচ্ছে','Using your own rate')+'</span></div>';
+    else if(st)h+='<div><span style="color:var(--orange)">'+s('সতর্কতা: BDT রেট পুরোনো ('+dig(st)+')','Warning: BDT rate is older ('+st+')')+'</span></div>';
+    o.innerHTML=h;
+    cmp.innerHTML=favs.filter(k=>k!==cf&&FX.r[k]).map(k=>row(k,fmt(a*fxRate(cf,k).v,4))).join('')||'<div class="empty">'+s('★ চাপ দিয়ে প্রিয় মুদ্রা যোগ করুন','Tap ★ to add favorites')+'</div>';
+    drawRec()};
+  const drawRec=()=>{const r=$('crec');r.innerHTML=crec.length?crec.map(x=>'<div><span>'+fmt(x.a,4)+' '+x.f+'</span><b>'+fmt(x.r,4)+' '+x.t+'</b></div>').join(''):'<div class="empty">—</div>'};
+  const save=()=>{const a=parseFloat($('ca').value);store.set('rh.camt',$('ca').value);store.set('rh.cf',cf);store.set('rh.ct',ct)};
+  const keep=()=>{const a=parseFloat($('ca').value);if(Number.isNaN(a)||a<=0)return;const e={a:a,f:cf,t:ct,r:a*fxRate(cf,ct).v};if(crec[0]&&crec[0].a===e.a&&crec[0].f===e.f&&crec[0].t===e.t&&crec[0].r===e.r)return;crec.unshift(e);crec=crec.slice(0,8);store.set('rh.crec',crec);drawRec()};
+  const loadOwn=()=>{const o=store.get('rh.own.'+cf+'.'+ct,'');$('cox').value=o};
+  $('ca').oninput=()=>{save();upd()};$('ca').onchange=keep;
+  $('cs').oninput=fill;
+  $('cfs').onchange=e=>{cf=e.target.value;save();loadOwn();upd();keep()};
+  $('cts').onchange=e=>{ct=e.target.value;save();loadOwn();upd();keep()};
+  $('csw').onclick=()=>{[cf,ct]=[ct,cf];save();fill();loadOwn();upd();keep()};
+  $('cfv').onclick=()=>{favs=favs.includes(cf)?favs.filter(k=>k!==cf):[...favs,cf];store.set('rh.fav',favs);upd()};
+  $('cox').oninput=()=>{const v=parseFloat($('cox').value);store.set('rh.own.'+cf+'.'+ct,v>0?$('cox').value:'');upd()};
+  $('cor').onclick=()=>{store.set('rh.own.'+cf+'.'+ct,'');$('cox').value='';upd()};
+  $('ccp').onclick=async()=>{const a=parseFloat($('ca').value);if(Number.isNaN(a))return;const txt=String(MathEngine.clean(a*fxRate(cf,ct).v));try{await navigator.clipboard.writeText(txt);$('ccp').textContent=s('কপি হয়েছে ✓','Copied ✓')}catch(e){$('ccp').textContent=s('কপি করা যায়নি','Copy blocked')}setTimeout(()=>{$('ccp').textContent=s('কপি','Copy')},1500)};
+  fill();loadOwn();upd();drawStatus();$('crf').onclick=refreshRates}
+
+/* ---------- Age / BMI / GPA ---------- */
+let tkind='age',gsc='bd4',gr=[{n:'',g:'A+',c:''},{n:'',g:'A',c:''}];
+const SC={us4:{A:4,'A-':3.7,'B+':3.3,B:3,'B-':2.7,'C+':2.3,C:2,'C-':1.7,'D+':1.3,D:1,F:0},bd4:{'A+':4,A:3.75,'A-':3.5,'B+':3.25,B:3,'B-':2.75,'C+':2.5,C:2.25,D:2,F:0},bd5:{'A+':5,A:4,'A-':3.5,B:3,C:2,D:1,F:0},custom:null};
+function buildTools(){const c=$('tools');c.innerHTML='<div class="tabs2" id="tkb"></div><div id="tbd"></div>';
+  [['age',S('বয়স','Age')],['bmi','BMI'],['gpa','GPA']].forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',String(k===tkind));b.onclick=()=>{tkind=k;buildTools()};$('tkb').appendChild(b)});
+  ({age:ageUI,bmi:bmiUI,gpa:gpaUI})[tkind]()}
+const errh=x=>'<div><span style="color:var(--red)">'+x+'</span></div>';
+function ageUI(){const b=$('tbd');b.innerHTML='<label>'+S('জন্ম তারিখ','Date of birth')+'</label><input type="date" id="dob"><div class="out" id="ao"></div>';
+  const run=()=>{const v=$('dob').value,o=$('ao');if(!v){o.innerHTML='';return}const [Y,M,D]=v.split('-').map(Number),t=new Date(),T=new Date(t.getFullYear(),t.getMonth(),t.getDate()),d=new Date(Y,M-1,D);
+    if(!(Y>=1900)||d.getMonth()!==M-1||d>T){o.innerHTML=errh(S('সঠিক ও ভবিষ্যতের নয় এমন তারিখ দিন','Enter a valid date that is not in the future'));return}
+    let y=T.getFullYear()-Y,m=T.getMonth()-(M-1),dd=T.getDate()-D;if(dd<0){m--;dd+=new Date(T.getFullYear(),T.getMonth(),0).getDate()}if(m<0){y--;m+=12}
+    const U=(a,b2,c2)=>Date.UTC(a,b2,c2),days=Math.round((U(T.getFullYear(),T.getMonth(),T.getDate())-U(Y,M-1,D))/864e5);
+    let nb=new Date(T.getFullYear(),M-1,D);if(nb<T)nb=new Date(T.getFullYear()+1,M-1,D);
+    const left=Math.round((U(nb.getFullYear(),nb.getMonth(),nb.getDate())-U(T.getFullYear(),T.getMonth(),T.getDate()))/864e5);
+    o.innerHTML=row(S('বয়স','Age'),fmt(y,0)+S(' বছর ',' y ')+fmt(m,0)+S(' মাস ',' m ')+fmt(dd,0)+S(' দিন',' d'))+row(S('মোট দিন','Total days lived'),fmt(days,0))+row(S('পরবর্তী জন্মদিন','Next birthday'),nb.toLocaleDateString(lang==='bn'?'bn-BD':'en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+row(S('বাকি দিন','Days remaining'),left===0?S('আজই!','Today!'):fmt(left,0))};
+  $('dob').oninput=run;run()}
+function bmiUI(){const b=$('tbd');
+  b.innerHTML='<div class="row"><div><label>'+S('উচ্চতার একক','Height unit')+'</label><select id="hu"><option value="cm">cm</option><option value="ft">ft + in</option></select></div><div><label>'+S('ওজনের একক','Weight unit')+'</label><select id="wu"><option value="kg">kg</option><option value="lb">lb</option></select></div></div><div class="row"><div><label id="hl1">cm</label><input id="h1" inputmode="decimal"></div><div id="h2w" style="display:none"><label>in</label><input id="h2" inputmode="decimal"></div></div><label>'+S('ওজন','Weight')+'</label><input id="w" inputmode="decimal"><div class="out" id="bo"></div><div class="note">'+S('BMI একটি সাধারণ স্ক্রিনিং মাপ, চিকিৎসা নির্ণয় নয়। বিভাগগুলো প্রাপ্তবয়স্কদের জন্য (WHO)। সন্দেহ থাকলে চিকিৎসকের পরামর্শ নিন।','BMI is a general screening measure, not a medical diagnosis. Categories are for adults (WHO). Ask a doctor if unsure.')+'</div>';
+  const run=()=>{const hu=$('hu').value,wu=$('wu').value;$('h2w').style.display=hu==='ft'?'':'none';$('hl1').textContent=hu==='ft'?'ft':'cm';const o=$('bo');
+    if(!$('h1').value||!$('w').value){o.innerHTML='';return}
+    const h1=parseFloat($('h1').value),h2=parseFloat($('h2').value||'0'),w=parseFloat($('w').value),cm=hu==='ft'?(h1*12+h2)*2.54:h1,kg=wu==='lb'?w*0.45359237:w;
+    if(!(cm>=50&&cm<=272)||!(kg>=2&&kg<=500)||(hu==='ft'&&(h2<0||h2>=12))){o.innerHTML=errh(S('সঠিক উচ্চতা ও ওজন দিন','Enter a valid height and weight'));return}
+    const m=cm/100,v=kg/(m*m),cat=v<18.5?S('কম ওজন','Underweight'):v<25?S('স্বাভাবিক','Normal'):v<30?S('বেশি ওজন','Overweight'):S('স্থূলতা','Obesity');
+    o.innerHTML=row('BMI',fmt(v,1))+row(S('বিভাগ','Category'),cat)+row(S('ধরা হয়েছে','Used'),fmt(cm,1)+' cm, '+fmt(kg,1)+' kg')};
+  b.querySelectorAll('input,select').forEach(e=>e.oninput=run);run()}
+function gpaUI(){const b=$('tbd'),opt=(v,l)=>'<option value="'+v+'">'+l+'</option>';
+  b.innerHTML='<label>'+S('গ্রেডিং স্কেল','Grading scale')+'</label><select id="gs">'+opt('bd4',S('বাংলাদেশ বিশ্ববিদ্যালয় (৪.০০)','Bangladesh university (4.00)'))+opt('bd5',S('বাংলাদেশ SSC/HSC (৫.০০)','Bangladesh SSC/HSC (5.00)'))+opt('us4','US letter (4.0)')+opt('custom',S('নিজে পয়েন্ট লিখব','Enter points myself'))+'</select><div id="gr"></div><div style="margin-top:10px"><button class="tb" id="ga">+ '+S('বিষয় যোগ','Add subject')+'</button></div><div class="row"><div><label>'+S('আগের CGPA (ঐচ্ছিক)','Previous CGPA (optional)')+'</label><input id="pc" inputmode="decimal"></div><div><label>'+S('আগের মোট ক্রেডিট','Previous credits')+'</label><input id="pk" inputmode="decimal"></div></div><div class="out" id="go"></div><div class="note">'+S('প্রতিষ্ঠানভেদে স্কেল আলাদা; আপনার প্রতিষ্ঠানের স্কেল মিলিয়ে নিন।','Scales differ between institutions; check yours.')+'</div>';
+  $('gs').value=gsc;
+  const calc=()=>{const o=$('go');let sp=0,sc=0,bad=false;const L=[];
+    gr.forEach(r=>{const p=SC[gsc]?SC[gsc][r.g]:parseFloat(r.g),c=parseFloat(r.c);if(r.c===''&&(SC[gsc]||r.g==='')) return;if(!(p>=0&&p<=10)||!(c>0)){bad=true;return}sp+=p*c;sc+=c;L.push((r.n||'—')+' '+r.g+' × '+fmt(c,2)+' = '+fmt(p*c,2))});
+    if(bad){o.innerHTML=errh(S('গ্রেড/পয়েন্ট (০–১০) ও ক্রেডিট (>০) সঠিক দিন','Enter valid grade/points (0–10) and credits (>0)'));return}
+    if(!sc){o.innerHTML='';return}
+    let h=row('GPA',fmt(sp/sc,2))+row(S('মোট ক্রেডিট','Total credits'),fmt(sc,2));
+    const pc=parseFloat($('pc').value),pk=parseFloat($('pk').value);if(pc>=0&&pk>0)h+=row('CGPA',fmt((pc*pk+sp)/(pk+sc),2));
+    o.innerHTML=h+'<div style="display:block;font-size:13px;color:var(--mute)">'+L.map(x=>'<div>'+x.replace(/[<>&]/g,'')+'</div>').join('')+'</div>'};
+  const draw=()=>{const g=$('gr');g.innerHTML='';gr.forEach((r,i)=>{const d=document.createElement('div');d.className='row';d.style.cssText='grid-template-columns:1.3fr 1fr .8fr auto;margin-top:8px;align-items:center';
+    const n=document.createElement('input');n.placeholder=S('বিষয়','Subject');n.value=r.n;n.oninput=()=>{r.n=n.value;calc()};
+    let gi;if(SC[gsc]){gi=document.createElement('select');Object.keys(SC[gsc]).forEach(k=>gi.add(new Option(k+' ('+SC[gsc][k]+')',k)));gi.value=r.g}else{gi=document.createElement('input');gi.inputMode='decimal';gi.placeholder=S('পয়েন্ট','Points');gi.value=r.g}
+    gi.oninput=()=>{r.g=gi.value;calc()};
+    const c=document.createElement('input');c.inputMode='decimal';c.placeholder=S('ক্রেডিট','Credit');c.value=r.c;c.oninput=()=>{r.c=c.value;calc()};
+    const x=document.createElement('button');x.className='tb';x.textContent='✕';x.setAttribute('aria-label',S('মুছুন','Remove'));x.onclick=()=>{if(gr.length>1){gr.splice(i,1);draw();calc()}};
+    [n,gi,c,x].forEach(e=>d.appendChild(e));g.appendChild(d)})};
+  $('gs').onchange=()=>{gsc=$('gs').value;gr.forEach(r=>{r.g=SC[gsc]?Object.keys(SC[gsc])[0]:''});draw();calc()};
+  $('ga').onclick=()=>{gr.push({n:'',g:SC[gsc]?Object.keys(SC[gsc])[0]:'',c:''});draw()};
+  $('pc').oninput=$('pk').oninput=calc;draw();calc()}
+/* ---------- Export / Backup ---------- */
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+const csvc=v=>{v=String(v);if(!isFinite(+v)&&/^[=+\-@\t\r]/.test(v))v="'"+v;return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const toCsv=(h,rs)=>'\ufeff'+[h].concat(rs).map(r=>r.map(csvc).join(',')).join('\r\n');
+const BK=/^rh\.(lang|theme|hist|angle|sci|cf|ct|camt|fav|crec|own\.[A-Z]{3}\.[A-Z]{3})$/;
+function validBackup(o){if(!o||typeof o!=='object'||o.app!=='RH Calculator'||o.version!==1||!o.data||typeof o.data!=='object')return 'format';
+  for(const k of Object.keys(o.data)){const v=o.data[k];if(!BK.test(k))return 'key '+k;
+    if(k==='rh.lang'&&!['bn','en'].includes(v))return k;if(k==='rh.theme'&&v!==null&&!['dark','light'].includes(v))return k;if(k==='rh.angle'&&!['deg','rad','grad'].includes(v))return k;
+    if(k==='rh.sci'&&typeof v!=='boolean')return k;if(/^rh\.(cf|ct)$/.test(k)&&!(typeof v==='string'&&v in FX.r))return k;if(/^rh\.(camt|own\.)/.test(k)&&typeof v!=='string')return k;
+    if(k==='rh.fav'&&!(Array.isArray(v)&&v.every(x=>typeof x==='string'&&x in FX.r)))return k;
+    if(k==='rh.hist'&&!(Array.isArray(v)&&v.length<=100&&v.every(x=>x&&typeof x.e==='string'&&typeof x.r==='string'&&isFinite(+x.r)&&isFinite(+x.d))))return k;
+    if(k==='rh.crec'&&!(Array.isArray(v)&&v.length<=50&&v.every(x=>x&&isFinite(x.a)&&isFinite(x.r)&&x.f in FX.r&&x.t in FX.r)))return k}
+  return null}
+function buildData(){const c=$('data'),B=(id,l)=>'<button class="tb" id="'+id+'">'+l+'</button>';
+  c.innerHTML='<b>'+S('এক্সপোর্ট','Export')+'</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">'+B('xh1',S('হিস্ট্রি CSV','History CSV'))+B('xh2',S('হিস্ট্রি JSON','History JSON'))+B('xc1',S('কারেন্সি CSV','Currency CSV'))+B('xc2',S('কারেন্সি JSON','Currency JSON'))+B('xp1',S('হিস্ট্রি PDF','History PDF'))+B('xp2',S('কারেন্সি PDF','Currency PDF'))+'</div><b>'+S('ব্যাকআপ ও রিস্টোর','Backup and restore')+'</b><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">'+B('bk',S('ব্যাকআপ ডাউনলোড','Download backup'))+'</div><label>'+S('ব্যাকআপ ফাইল থেকে রিস্টোর','Restore from backup file')+'</label><input type="file" id="rf" accept=".json,application/json"><div class="out" id="dmsg" style="display:none"></div><div class="note">'+S('সব ডেটা শুধু আপনার ডিভাইসেই থাকে; কিছু আপলোড হয় না। PDF-এর জন্য খোলা প্রিন্ট ডায়ালগে “Save as PDF” বেছে নিন।','All data stays on your device; nothing is uploaded. For PDF, choose “Save as PDF” in the print dialog that opens.')+'</div>';
+  const msg=(x,ok)=>{const m=$('dmsg');m.style.display='block';m.innerHTML='<div><span style="color:var(--'+(ok?'green':'red')+')">'+x+'</span></div>'};
+  const D=()=>new Date().toISOString().slice(0,10);
+  $('xh1').onclick=()=>dl('rh-history-'+D()+'.csv',toCsv(['date','expression','result'],hist.map(x=>[new Date(x.d).toISOString(),x.e,x.r])),'text/csv');
+  $('xh2').onclick=()=>dl('rh-history-'+D()+'.json',JSON.stringify(hist,null,2),'application/json');
+  $('xc1').onclick=()=>dl('rh-currency-'+D()+'.csv',toCsv(['amount','from','result','to'],crec.map(x=>[x.a,x.f,x.r,x.t])),'text/csv');
+  $('xc2').onclick=()=>dl('rh-currency-'+D()+'.json',JSON.stringify(crec,null,2),'application/json');
+  const pdf=(title,head,rows)=>{if(!rows.length){msg(S('এক্সপোর্ট করার মতো ডেটা নেই।','Nothing to export yet.'));return}let a=document.getElementById('pa');if(!a){a=document.createElement('div');a.id='pa';document.body.appendChild(a)}
+    const e=x=>String(x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    a.innerHTML='<h2>RH Calculator — '+e(title)+'</h2><table><tr>'+head.map(h=>'<th>'+e(h)+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+e(c)+'</td>').join('')+'</tr>').join('')+'</table>';window.print()};
+  $('xp1').onclick=()=>pdf(S('হিস্ট্রি','History'),[S('তারিখ','Date'),S('হিসাব','Expression'),S('ফল','Result')],hist.map(x=>[new Date(x.d).toLocaleString(lang==='bn'?'bn-BD':'en-GB'),dig(x.e),fmt(parseFloat(x.r),10)]));
+  $('xp2').onclick=()=>pdf(S('কারেন্সি','Currency'),[S('পরিমাণ','Amount'),S('থেকে','From'),S('ফল','Result'),S('এতে','To')],crec.map(x=>[fmt(x.a,4),x.f,fmt(x.r,4),x.t]));
+  $('bk').onclick=()=>{const data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(BK.test(k))data[k]=JSON.parse(localStorage.getItem(k))}}catch(e){}dl('rh-backup-'+D()+'.json',JSON.stringify({app:'RH Calculator',version:1,created:new Date().toISOString(),data:data},null,2),'application/json')};
+  $('rf').onchange=async e=>{const f=e.target.files[0];if(!f)return;let o;try{if(f.size>2e6)throw 0;o=JSON.parse(await f.text())}catch(x){msg(S('ফাইলটি পড়া যায়নি বা সঠিক ব্যাকআপ নয়। আপনার ডেটা বদলায়নি।','Could not read the file or it is not a valid backup. Your data is unchanged.'));e.target.value='';return}
+    const bad=validBackup(o);if(bad){msg(S('ব্যাকআপ ফাইলটি অবৈধ। আপনার ডেটা বদলায়নি।','The backup file is invalid. Your data is unchanged.'));e.target.value='';return}
+    if(!confirm(S('বর্তমান ডেটা ব্যাকআপের ডেটা দিয়ে বদলানো হবে। এগিয়ে যাবেন?','Current data will be replaced with the backup. Continue?'))){e.target.value='';return}
+    try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(BK.test(k))ks.push(k)}ks.forEach(k=>localStorage.removeItem(k))}catch(x){}
+    Object.keys(o.data).forEach(k=>store.set(k,o.data[k]));
+    lang=store.get('rh.lang','bn');theme=store.get('rh.theme',null);hist=store.get('rh.hist',[]);mode=store.get('rh.angle','deg');sciOn=store.get('rh.sci',false);cf=store.get('rh.cf','USD');ct=store.get('rh.ct','BDT');favs=store.get('rh.fav',['USD','BDT','EUR','SAR']);crec=store.get('rh.crec',[]);
+    applyTheme();renderAll();const m=$('dmsg');if(m){m.style.display='block';m.innerHTML='<div><span style="color:var(--green)">'+S('রিস্টোর সফল হয়েছে।','Restore completed.')+'</span></div>'}}}
+function renderAll(){document.documentElement.lang=lang;$('lang').textContent=lang==='bn'?'EN':'বাং';document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));buildNav();buildCalc();buildConv();buildFin();buildCur();buildTools();buildData()}
+applyTheme();renderAll();autoRates();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</body>
+</html>
